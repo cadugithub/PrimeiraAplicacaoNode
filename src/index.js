@@ -46,7 +46,7 @@ app.post("/account",(request, response)=>{
     })
     return response.status(201).send()
 })
-// app.use(middleware) => quando todas as próximas rotas precisarem do mesmo middleware
+// "app.use(middleware)" => quando todas as próximas rotas precisarem do mesmo middleware
 app.get("/statement", verifyIfExistsAccountCPF,(request, response)=>{
     const {costumer} = request
     console.log(request)
