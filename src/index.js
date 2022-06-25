@@ -11,12 +11,24 @@ const app = express()
 app.use(express.json())
 
 const customers = []
-/** 
-* cpf - String  
-* name - String
-* id - uuid
-* statement - []
-*/
+
+//==========MIDDLEWARE=================
+//Para uma função ser um middleware precisa ter três parâmetros
+function verifyIfExistsAccountCPF(request, response, next){
+
+    const { cpf } =  request.headers
+
+    const costumer = customers.find(customer => customer.cpf === cpf) // O método find retorna o valor encontrado
+
+    if(!costumer) {
+        return response.status(400).json({error : "Customer not found!"})
+    }
+
+    request.costumer = costumer // enviando o costumer para as próximas rotas
+    return next()
+}
+//==========MIDDLEWARE=================
+
 app.post("/account",(request, response)=>{
     const { cpf, name } =  request.body
 
@@ -34,17 +46,10 @@ app.post("/account",(request, response)=>{
     })
     return response.status(201).send()
 })
-
-app.get("/statement/:cpf",(request, response)=>{
-
-    const { cpf } =  request.params
-
-    const costumer = customers.find(customer => customer.cpf === cpf) // O método find retorna o valor encontrado
-
-    if(!costumer) {
-        return response.status(400).json({error : "Customer not found!"})
-    }
-
+// app.use(middleware) => quando todas as próximas rotas precisarem do mesmo middleware
+app.get("/statement", verifyIfExistsAccountCPF,(request, response)=>{
+    const {costumer} = request
+    console.log(request)
     return response.json(costumer.statement)
 })
 
