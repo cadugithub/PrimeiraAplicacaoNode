@@ -20,7 +20,7 @@ const customers = []
 app.post("/account",(request, response)=>{
     const { cpf, name } =  request.body
 
-    customerAlreadyExists = customers.some((customer) => customer.cpf === cpf)
+    customerAlreadyExists = customers.some((customer) => customer.cpf === cpf) // O método some verifica se existe dado com o valor passado
 
     if(customerAlreadyExists){
         return response.status(400).json({error: "Customer alredy exists"})
@@ -35,7 +35,18 @@ app.post("/account",(request, response)=>{
     return response.status(201).send()
 })
 
-app.get("/statement",(request, response)=>{})
+app.get("/statement/:cpf",(request, response)=>{
+
+    const { cpf } =  request.params
+
+    const costumer = customers.find(customer => customer.cpf === cpf) // O método find retorna o valor encontrado
+
+    if(!costumer) {
+        return response.status(400).json({error : "Customer not found!"})
+    }
+
+    return response.json(costumer.statement)
+})
 
 
 
