@@ -14,17 +14,18 @@ const customers = []
 
 //==========MIDDLEWARE=================
 //Para uma função ser um middleware precisa ter três parâmetros
+
 function verifyIfExistsAccountCPF(request, response, next){
 
     const { cpf } =  request.headers
 
-    const costumer = customers.find(customer => customer.cpf === cpf) // O método find retorna o valor encontrado
+    const customer = customers.find(customer => customer.cpf === cpf) // O método find retorna o valor encontrado
 
-    if(!costumer) {
+    if(!customer) {
         return response.status(400).json({error : "Customer not found!"})
     }
 
-    request.costumer = costumer // enviando o costumer para as próximas rotas
+    request.customer = customer // enviando o customer para as próximas rotas
     return next()
 }
 //==========MIDDLEWARE=================
@@ -48,11 +49,27 @@ app.post("/account",(request, response)=>{
 })
 // "app.use(middleware)" => quando todas as próximas rotas precisarem do mesmo middleware
 app.get("/statement", verifyIfExistsAccountCPF,(request, response)=>{
-    const {costumer} = request
-    console.log(request)
-    return response.json(costumer.statement)
-})
 
+    const {customer} = request
+    return response.json(customer.statement)
+
+})
+app.post("/deposit", verifyIfExistsAccountCPF ,(request, response)=>{
+    const { description, amount } = request.body
+
+    const {customer} = request
+
+    const statementOperation = {
+        description,
+        amount,
+        create_at: new Date(),
+        type: "credit"
+    }
+
+    customer.statement.push(statementOperation)
+
+    return response.status(201).send()
+})
 
 
 app.listen(3333) // localhost:3333
